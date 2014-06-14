@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"text/template"
 )
+
+type environment map[string]string
 
 type config struct {
 	leftDelim  string
@@ -26,34 +27,24 @@ func newConfig(lDelim, rightDelim, filename string, strict bool) config {
 	}
 }
 
-func (c config) envoke() error {
+func (c config) envoke(env environment) error {
 	if c.filename == "-" {
-		return c.envokeStdin()
+		return c.envokeStdin(env)
 	} else {
-		return c.envokeFile()
+		return c.envokeFile(env)
 	}
 }
 
-func getEnvironment(environment []string) map[string]string {
-	envMap := make(map[string]string, len(environment))
-	for _, str := range environment {
-		i := strings.SplitN(str, "=", 2)
-		envMap[i[0]] = i[1]
-	}
-	return envMap
-}
-
-func (c config) envokeFile() error {
-	fmt.Println(c.filename)
+func (c config) envokeFile(env environment) error {
 	t, err := template.ParseFiles(c.filename)
-	fmt.Println(os.Environ())
 	if nil != err {
 		return err
 	}
 
-	return t.Execute(c.output, getEnvironment(os.Environ()))
+	return t.Execute(c.output, env)
 }
 
-func (c config) envokeStdin() error {
+func (c config) envokeStdin(env environment) error {
+	// Line-buffering?
 	return fmt.Errorf("Stdin not supported yet")
 }

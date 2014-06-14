@@ -1,29 +1,10 @@
 package main
 
-// Envoke
-//
-// Fill template from environment variable
-// Usage:
-//   # Fill with default template syntax and print to stdout
-//   envoke template.file
-//
-//   # Fill with alternative delimiters and print to stdout
-//	 envoke '<<' '>>' template.file
-//
-//   # Fill template from stdin
-//   envoke
-//
-//   # Fill template from stdin
-//   envoke -
-//
-//   # Fill with alternative template delimiters from stdin
-//   envoke '<<' '>>' -
-//   envoke '<<' '>>'
-
 import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 )
 
 func main() {
@@ -61,7 +42,6 @@ func main() {
 
 	var conf config
 
-	// Longest form,
 	if flag.NArg() == 3 {
 		// Envoke template (or stdin) with custom delimiters
 		conf = newConfig(flag.Arg(0), flag.Arg(1), flag.Arg(2), *f)
@@ -75,7 +55,7 @@ func main() {
 		conf = newConfig("", "", "-", *f)
 	}
 
-	err := conf.envoke()
+	err := conf.envoke(getEnvironment(os.Environ()))
 	if nil != err {
 		log.Fatal(err)
 	}
