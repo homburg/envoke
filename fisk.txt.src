@@ -1,1 +1,1 @@
-Here is me: {{ User }}!
+Here is me: {{ .USER }}!

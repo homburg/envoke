@@ -59,22 +59,23 @@ func main() {
 		}
 	}
 
-	var err error
+	var conf config
 
 	// Longest form,
 	if flag.NArg() == 3 {
 		// Envoke template (or stdin) with custom delimiters
-		err = do(flag.Arg(0), flag.Arg(1), flag.Arg(2), *f)
+		conf = newConfig(flag.Arg(0), flag.Arg(1), flag.Arg(2), *f)
 	} else if flag.NArg() == 2 {
 		log.Fatal("Only 1 or 3 args, nothing in between.")
 	} else if flag.NArg() == 1 {
 		// Envoke template file (or stdin) with default delimiters
-		err = do("", "", flag.Arg(2), *f)
+		conf = newConfig("", "", flag.Arg(0), *f)
 	} else if flag.NArg() == 0 {
 		// Envoke stdin with default delimiters
-		err = do("", "", "-", *f)
+		conf = newConfig("", "", "-", *f)
 	}
 
+	err := conf.envoke()
 	if nil != err {
 		log.Fatal(err)
 	}
