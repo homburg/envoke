@@ -52,3 +52,11 @@ $ envoke -f "[[" "]]" somefile.html || echo 'Nope!'
 # <head>
 # ...
 ```
+
+## TODO
+
+- [ ] Stdin
+- [ ] Non-strict/force mode
+- [ ] Test for
+  - [ ] Help message
+
