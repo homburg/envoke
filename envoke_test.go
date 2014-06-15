@@ -64,3 +64,24 @@ func TestFailInNonStrictEnvoke(t *testing.T) {
 		})
 	})
 }
+
+func TestEnvokeReader(t *testing.T) {
+	Convey("Given a Reader", t, func() {
+		stdin := bytes.NewBufferString(`var x = "{{ API_KEY }}";`)
+		stdout := new(bytes.Buffer)
+
+		Convey("When envoked", func() {
+			conf := newConfig("", "", "-", true)
+			conf.output = stdout
+			err := conf.envokeReader(stdin, environment{"API_KEY": "sssecret"})
+
+			Convey("Should produce templated output", func() {
+				So(stdout.String(), ShouldEqual, `var x = "sssecret";`)
+			})
+
+			Convey("Should not produce an error", func() {
+				So(err, ShouldBeNil)
+			})
+		})
+	})
+}

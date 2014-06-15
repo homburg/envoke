@@ -44,13 +44,34 @@ func newConfig(lDelim, rightDelim, filename string, strict bool) config {
 
 func (c config) envoke(env environment) error {
 	if c.filename == "-" {
-		return c.envokeStdin(env)
+		return c.envokeReader(os.Stdin, env)
 	} else {
 		return c.envokeFile(env)
 	}
 }
 
+func (c config) envokeReader(stdin io.Reader, env environment) error {
+	buf, err := ioutil.ReadAll(stdin)
+
+	if nil != err {
+		return err
+	}
+
+	return c.envokeString(string(buf), env)
+}
+
 func (c config) envokeFile(env environment) error {
+	fileBytes, err := ioutil.ReadFile(c.filename)
+	if nil != err {
+		return err
+	}
+
+	fileText := string(fileBytes)
+
+	return c.envokeString(fileText, env)
+}
+
+func (c config) envokeString(templateStr string, env environment) error {
 	var err error
 	// Convert env to funcs, to avoid .VAR syntax
 	envFuncs := make(template.FuncMap, len(env))
@@ -62,19 +83,12 @@ func (c config) envokeFile(env environment) error {
 		})(val)
 	}
 
-	fileBytes, err := ioutil.ReadFile(c.filename)
-	if nil != err {
-		return err
-	}
-
-	fileText := string(fileBytes)
-
 addEnvFuncs:
 
 	t := template.New("envokeTemplate")
 	t.Funcs(envFuncs)
 	t.Delims(c.leftDelim, c.rightDelim)
-	t, err = t.Parse(fileText)
+	t, err = t.Parse(templateStr)
 	if nil != err {
 		missingFunctionNameMatch := REGEXP_FUNCTION_NOT_DEFINED_ERROR.FindStringSubmatch(err.Error())
 		if missingFunctionNameMatch != nil {
@@ -100,9 +114,4 @@ addEnvFuncs:
 	output := buff.String()
 	fmt.Fprint(c.output, output)
 	return nil
-}
-
-func (c config) envokeStdin(env environment) error {
-	// Line-buffering?
-	return fmt.Errorf("Stdin not supported yet")
 }
