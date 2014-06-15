@@ -1,7 +1,7 @@
 package main
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
+	. "github.com/homburg/goconvey/convey"
 	"testing"
 )
 
