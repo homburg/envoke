@@ -56,7 +56,8 @@ $ envoke -f "[[" "]]" somefile.html || echo 'Nope!'
 ## TODO
 
 - [ ] Stdin
-- [ ] Non-strict/force mode
+- [x] Non-strict/force mode
 - [ ] Test for
+  - [x] Fail on strict mode
   - [ ] Help message
 

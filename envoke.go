@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"regexp"
 	"text/template"
 )
 
@@ -15,6 +18,18 @@ type config struct {
 	filename   string
 	strict     bool
 	output     io.Writer
+}
+
+var EMPTY_STRING_FUNC func() string
+
+var REGEXP_FUNCTION_NOT_DEFINED_ERROR *regexp.Regexp
+
+func init() {
+	REGEXP_FUNCTION_NOT_DEFINED_ERROR = regexp.MustCompile(`function "([^"]+)" not defined$`)
+
+	EMPTY_STRING_FUNC = func() string {
+		return ""
+	}
 }
 
 func newConfig(lDelim, rightDelim, filename string, strict bool) config {
@@ -36,12 +51,55 @@ func (c config) envoke(env environment) error {
 }
 
 func (c config) envokeFile(env environment) error {
-	t, err := template.ParseFiles(c.filename)
+	var err error
+	// Convert env to funcs, to avoid .VAR syntax
+	envFuncs := make(template.FuncMap, len(env))
+	for name, val := range env {
+		envFuncs[name] = (func(str string) func() string {
+			return func() string {
+				return str
+			}
+		})(val)
+	}
+
+	fileBytes, err := ioutil.ReadFile(c.filename)
 	if nil != err {
 		return err
 	}
 
-	return t.Execute(c.output, env)
+	fileText := string(fileBytes)
+
+addEnvFuncs:
+
+	t := template.New("envokeTemplate")
+	t.Funcs(envFuncs)
+	t.Delims(c.leftDelim, c.rightDelim)
+	t, err = t.Parse(fileText)
+	if nil != err {
+		missingFunctionNameMatch := REGEXP_FUNCTION_NOT_DEFINED_ERROR.FindStringSubmatch(err.Error())
+		if missingFunctionNameMatch != nil {
+			if !c.strict {
+				// Recur!
+				envFuncs[missingFunctionNameMatch[1]] = EMPTY_STRING_FUNC
+				goto addEnvFuncs
+			} else {
+				// Non-strict mode. Fail with missing variable
+				return fmt.Errorf(`Undefined variable: "%s"`, missingFunctionNameMatch[1])
+			}
+		}
+		return err
+	}
+
+	var buff bytes.Buffer
+	err = t.Execute(&buff, env)
+
+	if nil != err {
+		return err
+	}
+
+	output := buff.String()
+	fmt.Fprint(c.output, output)
+	return nil
 }
 
 func (c config) envokeStdin(env environment) error {
