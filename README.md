@@ -4,7 +4,8 @@
 
 ## Template syntax
 
-`envoke` uses Go's (text/template)[http://golang.org/pkg/text/template/] package for templating. Environment variables are written with "." prefix, ie. `.USER`.
+`envoke` uses Go's [text/template](http://golang.org/pkg/text/template/) package for templating.
+All environment variables are converted to template "functions", ie. `{{ API_KEY }}`
 
 ## Usage
 
@@ -15,7 +16,7 @@ somefile.go.src
 
 package main
 
-const API_KEY = {{ .API_KEY }}
+const API_KEY = {{ API_KEY }}
 
 func main () {
 	
@@ -30,7 +31,7 @@ $ API_KEY=xkembiy envoke somefile.go.src > somefile.go
 $ echo "<html>
 <head>
 	<script type="text/javascript">
-	  window.API_KEY = [[ .API_KEY ]];
+	  window.API_KEY = [[ API_KEY ]];
 	</script>
 </head>
 <body>
@@ -51,11 +52,15 @@ $ envoke -f "[[" "]]" somefile.html || echo 'Nope!'
 # ->
 # <head>
 # ...
+
+
+# Envoke from stdin
+$ cat "Go {{ HOME }}" | envoke
 ```
 
 ## TODO
 
-- [ ] Stdin
+- [x] Stdin
 - [x] Non-strict/force mode
 - [ ] Test for
   - [x] Fail on strict mode
