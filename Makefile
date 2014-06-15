@@ -4,7 +4,7 @@
 
 # Default makefile target for travis-ci.org
 test:
-	go test -v ./...
+	go get -t -u && go test -v ./...
 
 install:
 	go install .
