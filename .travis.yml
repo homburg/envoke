@@ -4,5 +4,5 @@ go:
   - 1.2
   - tip
 install:
-  - go get github.com/homburg/goconvey/convey
+  - go get github.com/smartystreets/goconvey/convey
 
