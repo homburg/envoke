@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	. "github.com/homburg/goconvey/convey"
+	. "github.com/smartystreets/goconvey/convey"
 	"log"
 	"testing"
 )

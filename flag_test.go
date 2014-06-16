@@ -2,7 +2,7 @@ package main_test
 
 import (
 	"flag"
-	gc "github.com/homburg/goconvey/convey"
+	gc "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
