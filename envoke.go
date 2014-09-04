@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/andrew-d/go-termutil"
 	"io"
 	"io/ioutil"
 	"os"
@@ -44,6 +45,9 @@ func newConfig(lDelim, rightDelim, filename string, strict bool) config {
 
 func (c config) envoke(env environment) error {
 	if c.filename == "-" {
+		if termutil.Isatty(os.Stdin.Fd()) {
+			return ttyError{}
+		}
 		return c.envokeReader(os.Stdin, env)
 	} else {
 		return c.envokeFile(env)

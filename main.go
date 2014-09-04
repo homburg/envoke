@@ -7,9 +7,14 @@ import (
 	"os"
 )
 
+type ttyError struct{}
+
+func (e ttyError) Error() string {
+	return ""
+}
+
 func main() {
 	usage := `envoke fills templates from environment variables.
-
 
 	Usage:
 		
@@ -56,7 +61,11 @@ func main() {
 	}
 
 	err := conf.envoke(getEnvironment(os.Environ()))
-	if nil != err {
+	switch err := err.(type) {
+	case ttyError:
+		fmt.Println(usage)
+		return
+	default:
 		log.Fatal(err)
 	}
 }
