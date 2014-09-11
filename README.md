@@ -1,5 +1,7 @@
 # Envoke
 
+[![Build Status](https://travis-ci.org/homburg/envoke.svg?branch=master)](https://travis-ci.org/homburg/envoke)
+
 `envoke` is for templating a file from environment variables with whatever delimiters you could want.
 
 ## Template syntax
